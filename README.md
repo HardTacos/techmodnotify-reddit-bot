@@ -24,7 +24,6 @@ Start up a mySQL server and create the following table structure:
 +--------------+-----------------+------+-----+---------------------+-----------------------------+
 ````
 
-Be sure to call the table "submissions" - at the moment, it is hard coded.
 
 Basic usage
 -----------
