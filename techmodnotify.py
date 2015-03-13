@@ -150,7 +150,7 @@ def new_reply(permalink, author):
 
 def main():
     reddit.login(USER, PASS)
-    db = MySQLdb.connect("127.0.0.1", "hardtacos", "", "c9" )
+    db = MySQLdb.connect(DB_HOST, DB_USER, DB_PASS, DB_NAME )
     
     print "start"
     while True:
