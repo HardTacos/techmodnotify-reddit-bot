@@ -4,11 +4,6 @@ a user if he / she has not flaired their submission.
 
 This bot was created for [/r/technology](http://www.reddit.com/r/technolog)
 
-Author:
-
-[/u/zathegfx](http://www.reddit.com/u/zathegfx)
-[Github](https://github.com/HardTacos/)
-
 Installation
 ------------
 
@@ -16,6 +11,7 @@ Download this repo.
 
 Start up a mySQL server and create the following table structure:
 
+````
 +--------------+-----------------+------+-----+---------------------+-----------------------------+
 | Field        | Type            | Null | Key | Default             | Extra                       |
 +--------------+-----------------+------+-----+---------------------+-----------------------------+
@@ -26,6 +22,7 @@ Start up a mySQL server and create the following table structure:
 | permalink    | varchar(255)    | NO   |     | NULL                |                             |
 | author       | varchar(255)    | NO   |     | NULL                |                             |
 +--------------+-----------------+------+-----+---------------------+-----------------------------+
+````
 
 Be sure to call the table "submissions" - at the moment, it is hard coded.
 
@@ -35,3 +32,7 @@ Basic usage
 Change the config file to your proper credentials
 
 Run: `python techmodnotify.py`
+
+License
+-----------
+MIT
