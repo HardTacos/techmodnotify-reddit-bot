@@ -4,21 +4,18 @@
 # IMPORTS
 # =============================================================================
 import praw
-import re
 import MySQLdb
 import ConfigParser
 import time
-import urllib
 import parsedatetime.parsedatetime as pdt
 import pprint
+import logging
 from datetime import datetime, timedelta
 from requests.exceptions import HTTPError, ConnectionError, Timeout
 from praw.errors import ExceptionList, APIException, InvalidCaptcha, InvalidUser, RateLimitExceeded
 from socket import timeout
 from pytz import timezone
-from threading import Thread
 from multiprocessing import Process
-
 
 # =============================================================================
 # GLOBALS
@@ -28,7 +25,7 @@ from multiprocessing import Process
 config = ConfigParser.ConfigParser()
 config.read("techmodnotify.cfg")
 
-#Reddit info
+# Reddit info
 user_agent = ("TechModNotify bot by /u/zathegfx")
 reddit = praw.Reddit(user_agent = user_agent)
 USER = config.get("Reddit", "username")
@@ -39,7 +36,6 @@ DB_NAME = config.get("SQL", "db")
 DB_USER = config.get("SQL", "user")
 DB_PASS = config.get("SQL", "pass")
 DB_TABLE = config.get("SQL", "table")
-
 
 # =============================================================================
 # Functions
@@ -65,6 +61,7 @@ def save_to_db(db, submissionID, permalink, author):
     else:
         cmd = "INSERT INTO " + DB_TABLE + " (submissionID, currentTime, replyTime, permalink, author) VALUES (%s, %s, %s, %s, %s)"
         cursor.execute(cmd, [submissionID, currentTime, replyTime, permalink, author])
+        print currentTime + ' - Inserted new record into table: ' + submissionID
 
     db.commit()
     
@@ -100,12 +97,12 @@ def search_db():
                             cmd = "DELETE FROM " + DB_TABLE + " WHERE id = %s" 
                             cursor.execute(cmd, [row[0]])
                             db.commit()
-                            print row[1] + " deleted - no flair"
+                            print currentTime + ' - No flair detected - send message - deleting record - ' + row[1]
                     else:
                         cmd = "DELETE FROM " + DB_TABLE + " WHERE id = %s" 
                         cursor.execute(cmd, [row[0]])
                         db.commit()
-                        print row[1] + " deleted - has flair"
+                        print currentTime + ' - Flair deteced - deleting record - ' + row[1]
                     alreadySent.append(row[0])
                 
         time.sleep(5)
@@ -114,24 +111,33 @@ def new_reply(permalink, author):
         
         reddit.login(USER, PASS)
         try:
+            
             reddit.send_message(author, 'Message from /r/technology',
             
-                "Hello " + author + " ,"
+                "Hello " + author + ","
                 
-                "\n\nWe noticed that you haven't flaired your **[post](" + permalink + ")** yet. "
-                "In order to keep this sub organized, everyone is required "
-                "to flair their posts with respect to the article's main focus. "
+                "\n\nWe appreciate your contribution to /r/technology! We noticed "
+                "that you haven't flaired your [post](" + permalink + ") yet. In order to keep this sub " 
+                "organized, every post is required to be flaired with respect to "
+                "the articles main focus. This allows the readers of /r/technology "
+                "to easily find the articles that most interest them. "
                 
-                "\n\nThis allows the readers of /r/technology to easily filter "
-                "for the articles that most interest them. Please take a moment "
-                "to properly flair your post [insert instructions]. "
+                "\n\n If you could take a moment out of your time to properly flair "
+                "your post, we would gladly apprieciate it. Instruction on properly "
+                "flairing your post can be found [here](http://www.reddit.com/r/technology/wiki/flair). "
                 
                 "\n\n Thank you!"
-                "\n\n ~ Mod Team"
+                "\n\n Techonology Mod Team"
                 
-                "\n\n_____\n\n")
+                "\n\n_____\n\n"
                 
-            return True    
+                "\n\n *This is a bot - if you have any questions or need to report an issue regarding "
+                "this bot, please [message the mods](https://www.reddit.com/message/compose?to=%2Fr%2Ftechnology) immediately*"
+                
+                "\n\n**Your Post:** " + permalink + "")
+            
+            print "Message Sent!"
+            return True
         except InvalidUser as err:
             print "InvalidUser", err
             return True
@@ -162,8 +168,8 @@ def main():
                 permalink    = submission.permalink
                 
                 save_to_db(db, submissionID, permalink, author)
-
         except Exception as err:
+           print  'There was an error in main(): '
            print err
 # =============================================================================
 # RUNNER
